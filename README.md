@@ -35,16 +35,11 @@ python3 -m http.server 8765
 
 ## 提交清单
 - [x] 实施：静态 Demo + 提示词 + 设计说明 + 提交文案
-- [ ] 公网 URL（GitHub Pages 或等价）
+- [x] 公网 URL：https://shunjungu.github.io/subcancel-lite/ （GitHub Pages，2026-10-28 已通）
 - [ ] 【用户】App 内截完整规则
 - [ ] 【用户】活动内报名并提交 URL（**代理人未代提交**）
 
-## 推仓 / Pages（若尚未部署）
-在已登录 `gh` 的机器上：
-```bash
-gh repo create subcancel-lite --public --source=. --remote=origin --push
-# Settings → Pages → Deploy from branch → main / root
-# 或：
-gh api repos/ShunjunGu/subcancel-lite/pages -X POST -f build_type=legacy -f source[branch]=main -f source[path]=/
-```
-预期 URL：`https://shunjungu.github.io/subcancel-lite/`
+## 已部署
+- 仓库：https://github.com/ShunjunGu/subcancel-lite
+- Pages：https://shunjungu.github.io/subcancel-lite/ （HTTP 200 已核，上海时间 2026-10-28）
+- **未**在支付宝活动内报名/提交。

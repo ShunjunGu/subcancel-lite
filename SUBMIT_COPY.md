@@ -24,8 +24,7 @@
 本 Demo 为可公网访问的静态页（本地启发式解析，可选 LLM 增强），并附完整提示词，便于用 QMuse 等工具一键复现同一能力。
 
 ## 公网 URL
-（部署后填入，例如 GitHub Pages）  
-`https://shunjungu.github.io/subcancel-lite/`
+`https://shunjungu.github.io/subcancel-lite/`（已部署，2026-10-28 核验 HTTP 200）
 
 ## 演示步骤（评委 30 秒）
 1. 手机打开上述 URL  
