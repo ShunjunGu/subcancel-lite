@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#1677ff" />
+<meta name="description" content="扣费清理助手 — 粘贴短信/账单文字，梳理周期扣费与取消路径提示。不索要密码与卡号，不代操作。" />
+<title>扣费清理助手 · 智能体涌现奖 Demo</title>
+<style>
+  :root {
+    --bg: #f5f7fb;
+    --card: #ffffff;
+    --ink: #1f2329;
+    --muted: #646a73;
+    --line: #e5e8ef;
+    --brand: #1677ff;
+    --brand-soft: #e8f1ff;
+    --ok: #0a7a3e;
+    --warn: #b54708;
+    --danger: #c9372c;
+    --shadow: 0 8px 24px rgba(22, 40, 80, 0.08);
+    --radius: 16px;
+    --font: "PingFang SC", "Noto Sans SC", "Microsoft YaHei", system-ui, -apple-system, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: var(--font);
+    color: var(--ink);
+    background:
+      radial-gradient(1200px 400px at 10% -10%, #dbeafe 0%, transparent 60%),
+      radial-gradient(900px 300px at 100% 0%, #e0f2fe 0%, transparent 50%),
+      var(--bg);
+    min-height: 100vh;
+    line-height: 1.55;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 20px 16px 48px; }
+  header {
+    background: linear-gradient(135deg, #1677ff 0%, #3b82f6 55%, #60a5fa 100%);
+    color: #fff;
+    border-radius: 20px;
+    padding: 22px 20px 18px;
+    box-shadow: var(--shadow);
+    margin-bottom: 16px;
+  }
+  header h1 { margin: 0 0 6px; font-size: 1.35rem; font-weight: 700; letter-spacing: 0.02em; }
+  header p { margin: 0; opacity: 0.92; font-size: 0.92rem; }
+  .badge {
+    display: inline-block;
+    margin-top: 10px;
+    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.28);
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 0.75rem;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 14px;
+    box-shadow: var(--shadow);
+  }
+  .card h2 {
+    margin: 0 0 10px;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card h2 .dot {
+    width: 8px; height: 8px; border-radius: 50%; background: var(--brand);
+    display: inline-block;
+  }
+  label { display: block; font-size: 0.86rem; color: var(--muted); margin-bottom: 8px; }
+  textarea {
+    width: 100%;
+    min-height: 160px;
+    resize: vertical;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 12px;
+    font: inherit;
+    color: var(--ink);
+    background: #fafbfd;
+  }
+  textarea:focus {
+    outline: none;
+    border-color: var(--brand);
+    box-shadow: 0 0 0 3px rgba(22,119,255,0.15);
+    background: #fff;
+  }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  button, .btn {
+    appearance: none;
+    border: none;
+    cursor: pointer;
+    font: inherit;
+    border-radius: 999px;
+    padding: 10px 16px;
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+  .btn-primary { background: var(--brand); color: #fff; }
+  .btn-primary:active { transform: scale(0.98); }
+  .btn-ghost {
+    background: var(--brand-soft);
+    color: var(--brand);
+  }
+  .btn-lite {
+    background: #f3f4f6;
+    color: var(--ink);
+    font-weight: 500;
+    font-size: 0.82rem;
+    padding: 8px 12px;
+  }
+  .hint { font-size: 0.82rem; color: var(--muted); margin-top: 8px; }
+  .safety {
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+    color: #9a3412;
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-size: 0.86rem;
+  }
+  .safety strong { color: var(--danger); }
+  .safety ul { margin: 8px 0 0; padding-left: 1.1em; }
+  .empty {
+    text-align: center;
+    color: var(--muted);
+    padding: 28px 12px;
+    font-size: 0.92rem;
+  }
+  .meta {
+    display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;
+  }
+  .pill {
+    background: var(--brand-soft);
+    color: var(--brand);
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 0.78rem;
+    font-weight: 600;
+  }
+  .pill.warn { background: #fff7ed; color: var(--warn); }
+  .pill.ok { background: #ecfdf3; color: var(--ok); }
+  .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.86rem;
+    min-width: 560px;
+  }
+  th, td {
+    text-align: left;
+    padding: 10px 8px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+  }
+  th {
+    color: var(--muted);
+    font-weight: 600;
+    font-size: 0.78rem;
+    white-space: nowrap;
+  }
+  td.amount { font-weight: 700; color: var(--danger); white-space: nowrap; }
+  .conf {
+    display: inline-block;
+    border-radius: 6px;
+    padding: 2px 6px;
+    font-size: 0.72rem;
+    font-weight: 700;
+  }
+  .conf-high { background: #ecfdf3; color: var(--ok); }
+  .conf-mid { background: #fff7ed; color: var(--warn); }
+  .conf-low { background: #f3f4f6; color: var(--muted); }
+  .footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.78rem;
+    margin-top: 8px;
+  }
+  details.adv {
+    margin-top: 8px;
+    font-size: 0.86rem;
+    color: var(--muted);
+  }
+  details.adv summary { cursor: pointer; color: var(--brand); font-weight: 600; }
+  .llm-box {
+    margin-top: 10px;
+    display: none;
+    gap: 8px;
+    flex-direction: column;
+  }
+  .llm-box.on { display: flex; }
+  input[type="password"], input[type="text"], select {
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font: inherit;
+    background: #fafbfd;
+  }
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 24px;
+    transform: translateX(-50%) translateY(20px);
+    background: #111827;
+    color: #fff;
+    padding: 10px 16px;
+    border-radius: 999px;
+    font-size: 0.86rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: .25s ease;
+    z-index: 50;
+    max-width: 90vw;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  @media (max-width: 480px) {
+    header h1 { font-size: 1.2rem; }
+    .wrap { padding: 14px 12px 40px; }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>扣费清理助手</h1>
+      <p>粘贴扣费短信 / 账单文字 → 梳理周期扣费、金额、扣款日与取消路径提示。</p>
+      <span class="badge">个人 · 生活好帮手 · 演示版（本地解析）</span>
+    </header>
+
+    <div class="card safety" role="note">
+      <strong>安全边界（必读）</strong>
+      <ul>
+        <li>不索要、不存储密码、支付密码、验证码、银行卡号、身份证号。</li>
+        <li>不代你取消订阅、不代扣款、不跳转真实支付页。</li>
+        <li>解析结果仅供参考，取消前请在官方 App / 客服处人工核对。</li>
+        <li>示例文案为虚构，请勿粘贴含完整卡号等敏感信息的真实账单。</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2><span class="dot"></span>粘贴短信 / 账单文字</h2>
+      <label for="raw">支持多条短信、账单截图 OCR 文字、对账单摘要（一次可多段）</label>
+      <textarea id="raw" placeholder="例如：【爱奇艺】您的黄金会员将于每月08日自动续费25元……"></textarea>
+      <div class="row" style="margin-top:10px">
+        <button type="button" class="btn-lite" data-ex="0">示例 A · 视频会员</button>
+        <button type="button" class="btn-lite" data-ex="1">示例 B · 云盘+听书</button>
+        <button type="button" class="btn-lite" data-ex="2">示例 C · 混合账单</button>
+      </div>
+      <div class="row">
+        <button type="button" class="btn-primary" id="btnParse">解析扣费</button>
+        <button type="button" class="btn-ghost" id="btnClear">清空</button>
+        <button type="button" class="btn-ghost" id="btnCopy">复制结果表</button>
+      </div>
+      <p class="hint">默认纯本地启发式解析，无需登录、无需 API Key。也可在下方展开可选 LLM 增强（仅占位）。</p>
+      <details class="adv">
+        <summary>可选：接入公开 LLM API（无 Key 时不影响演示）</summary>
+        <div class="llm-box on" style="margin-top:10px">
+          <label for="llmMode">模式</label>
+          <select id="llmMode">
+            <option value="local" selected>仅本地解析（推荐演示）</option>
+            <option value="openai">OpenAI 兼容接口（需自行填 Key，请求在浏览器发出）</option>
+          </select>
+          <label for="llmBase">API Base（如 https://api.openai.com/v1）</label>
+          <input id="llmBase" type="text" placeholder="https://api.openai.com/v1" autocomplete="off" />
+          <label for="llmKey">API Key（仅存当前页面内存，刷新即失）</label>
+          <input id="llmKey" type="password" placeholder="sk-...（可选）" autocomplete="off" />
+          <label for="llmModel">模型名</label>
+          <input id="llmModel" type="text" value="gpt-4o-mini" autocomplete="off" />
+          <p class="hint">Key 不会写入 localStorage。活动提交请用本地解析即可。</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="card" id="resultCard">
+      <h2><span class="dot"></span>结构化结果</h2>
+      <div id="meta" class="meta" hidden></div>
+      <div id="resultEmpty" class="empty">还没有结果。点上方示例或粘贴文字后点「解析扣费」。</div>
+      <div id="resultTable" class="table-wrap" hidden></div>
+      <div id="tips" class="hint" hidden></div>
+    </div>
+
+    <p class="footer">支付宝「智能体涌现奖」Demo · 扣费清理助手 · 纯前端 · 不代操作</p>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+const EXAMPLES = [
+`【爱奇艺】温馨提示：您的黄金VIP会员将于每月08日通过支付宝自动续费25.00元，可在爱奇艺App-我的-会员中心取消自动续费。
+【腾讯视频】您已开通连续包月会员，下个扣款日2026-11-03将扣款30元，如需取消请前往腾讯视频App-个人中心-我的会员。
+【网易云音乐】黑胶VIP连续包月15元/月，将于每月15日从绑定支付方式扣款。取消路径：网易云App-账号-会员中心-自动续费管理。`,
+
+`【百度网盘】超级会员连续包月25元，扣款日每月20日。取消：百度网盘App-我的-超级会员-自动续费。
+【喜马拉雅】巅峰会员年卡自动续费248元，预计2026-12-01扣款。取消请至喜马拉雅App-账号-我的会员。
+【Keep】会员连续包月18元，将于11月12日自动扣款。可在Keep App-我的-会员-自动续费中关闭。`,
+
+`支付宝扣款通知：成功扣款¥12.00，收款方「哔哩哔哩大会员」，商品说明：连续包月自动续费，下一扣款日11月28日。
+中国联通：您办理的5G畅爽冰激凌套餐附加流量包将于每月1日扣费19元，详询10010。
+Apple：您的iCloud+ 50GB订阅将于每月06日续订，费用6元。管理订阅：设置-Apple ID-订阅。
+【美团外卖】神会员连续包月15元将于本月25日扣款，取消请打开美团App-我的-神会员。`
+];
+
+const CANCEL_HINTS = [
+  { re: /爱奇艺|iqiyi/i, tip: '爱奇艺 App → 我的 → 会员中心 / 自动续费管理' },
+  { re: /腾讯视频|txsp|qq.?video/i, tip: '腾讯视频 App → 个人中心 → 我的会员 / 自动续费' },
+  { re: /优酷|youku/i, tip: '优酷 App → 我的 → 会员中心 → 自动续费' },
+  { re: /芒果|mgtv/i, tip: '芒果TV App → 我的 → 会员 → 自动续费管理' },
+  { re: /哔哩|bilibili|大会员/i, tip: '哔哩哔哩 App → 我的 → 大会员 → 自动续费' },
+  { re: /网易云|云音乐/i, tip: '网易云音乐 → 账号 → 会员中心 → 自动续费管理' },
+  { re: /QQ音乐|qq音乐/i, tip: 'QQ音乐 → 我的 → 会员中心 → 自动续费' },
+  { re: /喜马拉雅/i, tip: '喜马拉雅 → 账号 → 我的会员 → 自动续费' },
+  { re: /百度网盘|超级会员/i, tip: '百度网盘 → 我的 → 超级会员 → 自动续费' },
+  { re: /Keep/i, tip: 'Keep → 我的 → 会员 → 自动续费' },
+  { re: /美团|神会员/i, tip: '美团 → 我的 → 神会员 / 省钱卡 → 自动续费' },
+  { re: /饿了么|超级吃货/i, tip: '饿了么 → 我的 → 超级吃货会员 → 自动续费' },
+  { re: /iCloud|Apple|苹果/i, tip: '设置 → Apple ID → 订阅（或 App Store → 右上角头像 → 订阅）' },
+  { re: /Google|谷歌|YouTube|YouTube\s*Premium/i, tip: 'play.google.com/store/account/subscriptions 或对应 App 订阅管理' },
+  { re: /Spotify/i, tip: 'Spotify → 设置 → 订阅 / 对应支付渠道订阅管理' },
+  { re: /联通|10010/i, tip: '联通营业厅 / 10010 / 联通 App → 已办业务 → 退订（以运营商为准）' },
+  { re: /移动|10086/i, tip: '中国移动 App / 10086 → 已订业务 → 退订（以运营商为准）' },
+  { re: /电信|10000/i, tip: '电信营业厅 / 10000 → 已订业务 → 退订（以运营商为准）' },
+  { re: /支付宝/i, tip: '支付宝 → 我的 → 设置 → 支付设置 → 免密支付/自动扣款（核对商户后关闭）' },
+  { re: /微信支付|微信/i, tip: '微信 → 我 → 服务 → 钱包 → 支付设置 → 自动续费' },
+];
+
+const MERCHANT_PATTERNS = [
+  /爱奇艺|腾讯视频|优酷|芒果TV?|哔哩哔哩|B站|网易云音乐|QQ音乐|喜马拉雅|百度网盘|Keep|美团|饿了么|iCloud|Apple|Spotify|YouTube|中国联通|中国移动|中国电信|支付宝|微信/gi,
+  /【([^】]{2,20})】/g,
+  /收款方[「「"]([^」」"]+)[」」"]/g,
+  /商户[：:]\s*([^\s，,。；;]{2,30})/g,
+];
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+function normalize(text) {
+  return String(text || '')
+    .replace(/\r\n/g, '\n')
+    .replace(/[￥]/g, '¥')
+    .replace(/／/g, '/')
+    .trim();
+}
+
+function splitChunks(text) {
+  const parts = text.split(/\n+|。(?=【)|；(?=【)/).map(s => s.trim()).filter(Boolean);
+  if (parts.length <= 1) {
+    const byBracket = text.split(/(?=【)/).map(s => s.trim()).filter(Boolean);
+    return byBracket.length > 1 ? byBracket : (text ? [text] : []);
+  }
+  return parts;
+}
+
+function parseAmount(s) {
+  const m = s.match(/(?:¥|RMB|人民币)?\s*(\d+(?:\.\d{1,2})?)\s*元?/);
+  if (!m) return null;
+  const n = Number(m[1]);
+  if (!Number.isFinite(n)) return null;
+  return n;
+}
+
+function parseCycle(s) {
+  if (/年卡|每年|\/年|连续包年|年费/.test(s)) return '每年';
+  if (/季|季度|\/季/.test(s)) return '每季';
+  if (/周|每周|\/周/.test(s)) return '每周';
+  if (/连续包月|每月|\/月|月费|包月/.test(s)) return '每月';
+  if (/自动续费|自动扣款|代扣/.test(s)) return '周期扣费（待确认）';
+  return '未知';
+}
+
+function parseNextDate(s) {
+  let m = s.match(/(20\d{2})[年\-/.](\d{1,2})[月\-/.](\d{1,2})/);
+  if (m) return `${m[1]}-${String(m[2]).padStart(2,'0')}-${String(m[3]).padStart(2,'0')}`;
+  m = s.match(/(\d{1,2})月(\d{1,2})日/);
+  if (m) {
+    const y = new Date().getFullYear();
+    return `${y}-${String(m[1]).padStart(2,'0')}-${String(m[2]).padStart(2,'0')}（推定年份）`;
+  }
+  m = s.match(/每月0?(\d{1,2})日/);
+  if (m) return `每月${Number(m[1])}日`;
+  m = s.match(/(?:下个?扣款日|扣款日|续订日|续费日)[为是：:\s]*([0-9\-/.年月日前]+)/);
+  if (m) return m[1].replace(/前$/,'').trim();
+  return '未识别';
+}
+
+function guessMerchant(s) {
+  for (const rule of CANCEL_HINTS) {
+    if (rule.re.test(s)) {
+      const name = s.match(rule.re);
+      return name ? name[0] : '未知商户';
+    }
+  }
+  let m = s.match(/【([^】]{2,20})】/);
+  if (m) return m[1];
+  m = s.match(/收款方[「「"]([^」」"]+)[」」"]/);
+  if (m) return m[1];
+  m = s.match(/商户[：:]\s*([^\s，,。；;]{2,30})/);
+  if (m) return m[1];
+  return '未知商户';
+}
+
+function cancelTip(merchant, raw) {
+  const blob = merchant + ' ' + raw;
+  for (const rule of CANCEL_HINTS) {
+    if (rule.re.test(blob)) return rule.tip;
+  }
+  if (/支付宝/.test(raw)) return '支付宝 → 我的 → 设置 → 支付设置 → 自动扣款 / 免密支付中核对商户后关闭';
+  if (/微信/.test(raw)) return '微信 → 我 → 服务 → 钱包 → 支付设置 → 自动续费';
+  return '请在对应官方 App「会员/订阅/自动续费」中核对；不确定时联系官方客服，勿向陌生人提供验证码';
+}
+
+function confidenceOf(item) {
+  let score = 0;
+  if (item.merchant && item.merchant !== '未知商户') score += 1;
+  if (item.amount != null) score += 1;
+  if (item.cycle && item.cycle !== '未知') score += 1;
+  if (item.nextDate && item.nextDate !== '未识别') score += 1;
+  if (item.cancel && !item.cancel.includes('不确定')) score += 1;
+  if (score >= 4) return '高';
+  if (score >= 2) return '中';
+  return '低';
+}
+
+function parseLocal(text) {
+  const chunks = splitChunks(normalize(text));
+  const items = [];
+  for (const chunk of chunks) {
+    if (chunk.length < 6) continue;
+    const looksBilling = /续费|扣款|扣费|订阅|会员|包月|代扣|自动|账单|续订|金额|元|¥/.test(chunk);
+    if (!looksBilling) continue;
+    const merchant = guessMerchant(chunk);
+    const amount = parseAmount(chunk);
+    const cycle = parseCycle(chunk);
+    const nextDate = parseNextDate(chunk);
+    const cancel = cancelTip(merchant, chunk);
+    const item = {
+      merchant,
+      amount,
+      cycle,
+      nextDate,
+      cancel,
+      source: chunk.slice(0, 80) + (chunk.length > 80 ? '…' : ''),
+    };
+    item.confidence = confidenceOf(item);
+    items.push(item);
+  }
+  // de-dupe similar merchant+amount
+  const seen = new Set();
+  return items.filter(it => {
+    const k = `${it.merchant}|${it.amount}|${it.cycle}|${it.nextDate}`;
+    if (seen.has(k)) return false;
+    seen.add(k);
+    return true;
+  });
+}
+
+function money(n) {
+  if (n == null) return '—';
+  return '¥' + Number(n).toFixed(2).replace(/\.00$/, '');
+}
+
+function confClass(c) {
+  if (c === '高') return 'conf conf-high';
+  if (c === '中') return 'conf conf-mid';
+  return 'conf conf-low';
+}
+
+function render(items, modeLabel) {
+  const empty = document.getElementById('resultEmpty');
+  const table = document.getElementById('resultTable');
+  const meta = document.getElementById('meta');
+  const tips = document.getElementById('tips');
+  if (!items.length) {
+    empty.hidden = false;
+    empty.textContent = '未识别到周期扣费条目。可换示例，或补充含「续费/扣款/会员/金额」的文字。';
+    table.hidden = true;
+    meta.hidden = true;
+    tips.hidden = true;
+    return;
+  }
+  empty.hidden = true;
+  table.hidden = false;
+  meta.hidden = false;
+  tips.hidden = false;
+  const monthly = items.filter(i => i.cycle === '每月' && i.amount != null).reduce((a,b)=>a+(b.amount||0),0);
+  meta.innerHTML = `
+    <span class="pill">${items.length} 条扣费</span>
+    <span class="pill ok">模式：${modeLabel}</span>
+    ${monthly > 0 ? `<span class="pill warn">已识别月费合计约 ${money(monthly)}</span>` : ''}
+  `;
+  table.innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th>商户/服务</th>
+          <th>金额</th>
+          <th>周期</th>
+          <th>扣款/到期</th>
+          <th>取消路径提示</th>
+          <th>置信度</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${items.map(it => `
+          <tr>
+            <td><strong>${escapeHtml(it.merchant)}</strong><div class="hint">${escapeHtml(it.source||'')}</div></td>
+            <td class="amount">${escapeHtml(money(it.amount))}</td>
+            <td>${escapeHtml(it.cycle)}</td>
+            <td>${escapeHtml(it.nextDate)}</td>
+            <td>${escapeHtml(it.cancel)}</td>
+            <td><span class="${confClass(it.confidence)}">${escapeHtml(it.confidence)}</span></td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+  tips.innerHTML = '下一步建议：① 优先处理金额高 / 即将扣款的项目；② 在官方 App 关闭自动续费后，隔日再核对是否仍出现扣款短信；③ 对「置信度低」条目请人工复核原文。';
+  window.__lastItems = items;
+}
+
+function escapeHtml(s) {
+  return String(s)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+function itemsToTsv(items) {
+  const header = ['商户/服务','金额','周期','扣款/到期','取消路径提示','置信度'];
+  const rows = items.map(it => [it.merchant, money(it.amount), it.cycle, it.nextDate, it.cancel, it.confidence]);
+  return [header, ...rows].map(r => r.join('\t')).join('\n');
+}
+
+async function parseWithLlm(text) {
+  const base = (document.getElementById('llmBase').value || '').replace(/\/$/, '');
+  const key = document.getElementById('llmKey').value.trim();
+  const model = document.getElementById('llmModel').value.trim() || 'gpt-4o-mini';
+  if (!base || !key) throw new Error('未填写 API Base 或 Key，已回退本地解析');
+  const system = `你是「扣费清理助手」。从用户粘贴的中文短信/账单文字中提取周期扣费项目。
+只输出 JSON 数组，每项字段：merchant, amount(number|null), cycle, nextDate, cancel, confidence(高|中|低)。
+约束：不要索要密码/卡号；不要编造不存在的商户；不确定就降低 confidence；cancel 只给官方路径提示，不给钓鱼链接。`;
+  const res = await fetch(base + '/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + key,
+    },
+    body: JSON.stringify({
+      model,
+      temperature: 0.1,
+      messages: [
+        { role: 'system', content: system },
+        { role: 'user', content: text },
+      ],
+    }),
+  });
+  if (!res.ok) throw new Error('LLM 请求失败 HTTP ' + res.status);
+  const data = await res.json();
+  const content = data.choices?.[0]?.message?.content || '';
+  const m = content.match(/\[[\s\S]*\]/);
+  if (!m) throw new Error('LLM 未返回 JSON 数组');
+  const arr = JSON.parse(m[0]);
+  return arr.map(it => ({
+    merchant: it.merchant || '未知商户',
+    amount: typeof it.amount === 'number' ? it.amount : null,
+    cycle: it.cycle || '未知',
+    nextDate: it.nextDate || '未识别',
+    cancel: it.cancel || '请在官方 App 核对',
+    confidence: it.confidence || '中',
+    source: '',
+  }));
+}
+
+async function runParse() {
+  const text = document.getElementById('raw').value;
+  if (!normalize(text)) {
+    toast('请先粘贴文字或点示例');
+    return;
+  }
+  const mode = document.getElementById('llmMode').value;
+  let items;
+  let label = '本地启发式';
+  if (mode === 'openai') {
+    try {
+      items = await parseWithLlm(text);
+      label = 'LLM 增强';
+    } catch (e) {
+      items = parseLocal(text);
+      label = '本地启发式（LLM 回退）';
+      toast(String(e.message || e));
+    }
+  } else {
+    items = parseLocal(text);
+  }
+  render(items, label);
+  if (items.length) toast('已解析 ' + items.length + ' 条');
+  else toast('未识别到条目');
+}
+
+document.querySelectorAll('[data-ex]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const i = Number(btn.getAttribute('data-ex'));
+    document.getElementById('raw').value = EXAMPLES[i];
+    toast('已填入示例 ' + 'ABC'[i]);
+  });
+});
+document.getElementById('btnParse').addEventListener('click', () => runParse());
+document.getElementById('btnClear').addEventListener('click', () => {
+  document.getElementById('raw').value = '';
+  render([], '');
+  document.getElementById('resultEmpty').textContent = '还没有结果。点上方示例或粘贴文字后点「解析扣费」。';
+  toast('已清空');
+});
+document.getElementById('btnCopy').addEventListener('click', async () => {
+  const items = window.__lastItems || [];
+  if (!items.length) { toast('暂无结果可复制'); return; }
+  try {
+    await navigator.clipboard.writeText(itemsToTsv(items));
+    toast('已复制为表格文本');
+  } catch {
+    toast('复制失败，请手动选择表格');
+  }
+});
+</script>
+</body>
+</html>
